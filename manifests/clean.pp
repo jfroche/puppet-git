@@ -1,4 +1,4 @@
-define git::clean($localtree = "/srv/git/", $real_name = false) {
+define git::clean($localtree = '/srv/git/', $real_name = false) {
 
     #
     # Resource to clean out a working directory
@@ -8,10 +8,10 @@ define git::clean($localtree = "/srv/git/", $real_name = false) {
     #
 
     exec { "git_clean_exec_$name":
-        cwd => $real_name ? {
-            false => "$localtree/$name",
+        cwd     => $real_name ? {
+            false   => "$localtree/$name",
             default => "$localtree/$real_name"
         },
-        command => "git clean -d -f"
+        command => 'git clean -d -f'
     }
 }

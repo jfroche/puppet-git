@@ -1,5 +1,5 @@
 define git::clone(   $source,
-                $localtree = "/srv/git/",
+                $localtree = '/srv/git/',
                 $real_name = false,
                 $branch = false) {
     if $real_name {
@@ -10,7 +10,7 @@ define git::clone(   $source,
     }
 
     exec { "git_clone_exec_$localtree/$_name":
-        cwd => $localtree,
+        cwd     => $localtree,
         command => "git clone $source $_name",
         creates => "$localtree/$_name/.git/"
     }
@@ -18,8 +18,8 @@ define git::clone(   $source,
     case $branch {
         false: {}
         default: {
-            exec { "git_clone_checkout_$branch_$localtree/$_name":
-                cwd => "$localtree/$_name",
+            exec { "git_clone_checkout_${branch}_${localtree}/${_name}":
+                cwd     => "$localtree/$_name",
                 command => "git checkout --track -b $branch origin/$branch",
                 creates => "$localtree/$_name/.git/refs/heads/$branch"
             }

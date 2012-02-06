@@ -1,4 +1,4 @@
-define git::pull($localtree = "/srv/git/", $real_name = false,
+define git::pull($localtree = '/srv/git/', $real_name = false,
             $reset = true, $clean = true, $branch = false) {
 
     #
@@ -15,39 +15,39 @@ define git::pull($localtree = "/srv/git/", $real_name = false,
     #
 
     if $reset {
-        git::reset { "$name":
-            localtree => "$localtree",
-            real_name => "$real_name",
-            clean => $clean
+        git::reset { $name:
+            localtree => $localtree,
+            real_name => $real_name,
+            clean     => $clean
         }
     }
 
     @exec { "git_pull_exec_$name":
-        cwd => "$localtree/$real_name",
-        command => "git pull",
-        onlyif => "test -d $localtree/$real_name/.git/info"
+        cwd     => "$localtree/$real_name",
+        command => 'git pull',
+        onlyif  => "test -d $localtree/$real_name/.git/info"
     }
 
     case $branch {
         false: {}
         default: {
-            exec { "git_pull_checkout_$branch_$localtree/$_name":
-                cwd => "$localtree/$_name",
+            exec { "git_pull_checkout_${branch}_${localtree}/${name}":
+                cwd     => "$localtree/$name",
                 command => "git checkout --track -b $branch origin/$branch",
-                creates => "$localtree/$_name/refs/heads/$branch"
+                creates => "$localtree/$name/refs/heads/$branch"
             }
         }
     }
 
-    if defined(Git::Reset["$name"]) {
+    if defined(Git::Reset[$name]) {
         Exec["git_pull_exec_$name"] {
-            require +> Git::Reset["$name"]
+            require +> Git::Reset[$name]
         }
     }
 
-    if defined(Git::Clean["$name"]) {
+    if defined(Git::Clean[$name]) {
         Exec["git_pull_exec_$name"] {
-            require +> Git::Clean["$name"]
+            require +> Git::Clean[$name]
         }
     }
 
