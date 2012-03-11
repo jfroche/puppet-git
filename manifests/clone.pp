@@ -42,7 +42,7 @@ define git::clone(   $source,
               exec { "git_clone_checkout_${branch}_${localtree}/${_name}":
                   cwd     => "$localtree/$_name",
                   command => "git checkout --track -b $branch origin/$branch",
-                  creates => "$localtree/$_name/.git/refs/heads/$branch"
+                  creates => "$localtree/$_name/.git/refs/heads/$branch",
                   user    => $user,
                   require => User[$user]
               }
