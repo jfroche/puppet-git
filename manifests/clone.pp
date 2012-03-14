@@ -30,10 +30,9 @@ define git::clone(   $source,
     } else {
       exec { "git_clone_exec_$localtree/$_name":
           cwd     => $localtree,
-          command => "git clone $source $_name",
+          command => "sudo -u $user git clone $source $_name",
           creates => "$localtree/$_name/.git/",
-          user    => $user,
-          require => User[$user]
+          timeout => 0
       }
 
       case $branch {
@@ -44,7 +43,8 @@ define git::clone(   $source,
                   command => "git checkout --track -b $branch origin/$branch",
                   creates => "$localtree/$_name/.git/refs/heads/$branch",
                   user    => $user,
-                  require => User[$user]
+                  require => User[$user],
+                  timeout => 0
               }
           }
       }
