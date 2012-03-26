@@ -1,5 +1,13 @@
 define git::pull($localtree = '/srv/git/', $real_name = false,
-            $reset = true, $clean = true, $branch = false) {
+            $reset = true, $clean = true, $branch = false,
+            $user = '') {
+
+    if $real_name {
+        $_name = $real_name
+    }
+    else {
+        $_name = $name
+    }
 
     #
     # This resource enables one to update a working directory
@@ -18,23 +26,33 @@ define git::pull($localtree = '/srv/git/', $real_name = false,
         git::reset { $name:
             localtree => $localtree,
             real_name => $real_name,
-            clean     => $clean
+            clean     => $clean,
+            user      => $user
         }
     }
 
-    @exec { "git_pull_exec_$name":
-        cwd     => "$localtree/$real_name",
-        command => 'git pull',
-        onlyif  => "test -d $localtree/$real_name/.git/info"
+    if $user == '' {
+      @exec { "git_pull_exec_$name":
+          cwd     => "$localtree/$_name",
+          command => 'git pull',
+          onlyif  => "test -d $localtree/$_name/.git/info"
+      }
+    }
+    else {
+      @exec { "git_pull_exec_$name":
+          cwd     => "$localtree/$_name",
+          command => "sudo -u $user git pull",
+          onlyif  => "test -d $localtree/$_name/.git/info"
+      }
     }
 
     case $branch {
         false: {}
         default: {
             exec { "git_pull_checkout_${branch}_${localtree}/${name}":
-                cwd     => "$localtree/$name",
+                cwd     => "$localtree/$_name",
                 command => "git checkout --track -b $branch origin/$branch",
-                creates => "$localtree/$name/refs/heads/$branch"
+                creates => "$localtree/$_name/.git/refs/heads/$branch"
             }
         }
     }
