@@ -1,6 +1,6 @@
 define git::pull($localtree = '/srv/git/', $real_name = false,
             $reset = true, $clean = true, $branch = false,
-            $user = '') {
+            $git_tag = false, $user = '') {
 
     if $real_name {
         $_name = $real_name
@@ -31,28 +31,50 @@ define git::pull($localtree = '/srv/git/', $real_name = false,
         }
     }
 
-    if $user == '' {
-      @exec { "git_pull_exec_$name":
-          cwd     => "$localtree/$_name",
-          command => 'git pull',
-          onlyif  => "test -d $localtree/$_name/.git/info"
-      }
-    }
-    else {
-      @exec { "git_pull_exec_$name":
-          cwd     => "$localtree/$_name",
-          command => "sudo -u $user git pull",
-          onlyif  => "test -d $localtree/$_name/.git/info"
-      }
-    }
+    if $git_tag {
 
-    case $branch {
-        false: {}
-        default: {
-            exec { "git_pull_checkout_${branch}_${localtree}/${name}":
-                cwd     => "$localtree/$_name",
-                command => "git checkout --track -b $branch origin/$branch",
-                creates => "$localtree/$_name/.git/refs/heads/$branch"
+        if $git_tag == 'latest' {
+            $git_checkout_tag = '`git describe --tags $(git rev-list --tags --max-count=1)`'
+        } else {
+            $git_checkout_tag = $git_tag
+        }
+
+        @exec { "git_pull_exec_$name":
+            cwd     => "$localtree/$_name",
+            command => "sudo -u $user git fetch --tags",
+            onlyif  => "test -d $localtree/$_name/.git/info"
+        }
+
+        exec { "git_checkout_tag_${name}_${git_tag}":
+            cwd     => "$localtree/$_name",
+            command => "sudo -u $user git checkout $git_checkout_tag",
+            creates => "$localtree/$_name/git/refs/tags/$git_checkout_tag",
+        }
+    } else {
+
+        if $user == '' {
+          @exec { "git_pull_exec_$name":
+              cwd     => "$localtree/$_name",
+              command => 'git pull',
+              onlyif  => "test -d $localtree/$_name/.git/info"
+          }
+        }
+        else {
+          @exec { "git_pull_exec_$name":
+              cwd     => "$localtree/$_name",
+              command => "sudo -u $user git pull",
+              onlyif  => "test -d $localtree/$_name/.git/info"
+          }
+        }
+
+        case $branch {
+            false: {}
+            default: {
+                exec { "git_pull_checkout_${branch}_${localtree}/${name}":
+                    cwd     => "$localtree/$_name",
+                    command => "git checkout --track -b $branch origin/$branch",
+                    creates => "$localtree/$_name/.git/refs/heads/$branch"
+                }
             }
         }
     }
