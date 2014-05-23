@@ -2,7 +2,8 @@ define git::reset (
   $localtree = '/srv/git/',
   $real_name = false,
   $clean     = true,
-  $user      = '') {
+  $user      = '',
+  $schedule  = undef) {
   #
   # Resource to reset changes in a working directory
   # Useful to undo any changes that might have occured in directories
@@ -12,6 +13,10 @@ define git::reset (
   # You can set $clean to false to prevent a clean (removing untracked
   # files)
   #
+  if $schedule != undef {
+    Exec {
+      schedule => $schedule, }
+  }
 
   if $user == '' {
     exec { "git_reset_exec_$name":

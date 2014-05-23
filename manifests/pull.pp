@@ -5,6 +5,7 @@ define git::pull (
   $clean     = true,
   $branch    = false,
   $git_tag   = false,
+  $schedule  = undef,
   $user      = '') {
   if $real_name {
     $_name = $real_name
@@ -32,6 +33,11 @@ define git::pull (
       clean     => $clean,
       user      => $user
     }
+  }
+
+  if $schedule != undef {
+    Exec {
+      schedule => $schedule, }
   }
 
   if $git_tag {

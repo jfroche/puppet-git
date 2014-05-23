@@ -3,11 +3,17 @@ define git::clone (
   $localtree = '/srv/git/',
   $real_name = false,
   $branch    = false,
-  $user      = '') {
+  $user      = '',
+  $schedule  = undef) {
   if $real_name {
     $_name = $real_name
   } else {
     $_name = $name
+  }
+
+  if $schedule != undef {
+    Exec {
+      schedule => $schedule, }
   }
 
   if $user == '' {

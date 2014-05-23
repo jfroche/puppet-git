@@ -1,13 +1,19 @@
 define git::clean (
   $localtree = '/srv/git/',
   $real_name = false,
-  $user      = '') {
+  $user      = '',
+  $schedule  = undef) {
   #
   # Resource to clean out a working directory
   # Useful for directories you want to pull from upstream, but might
   # have added files. This resource is applied for all pull resources,
   # by default.
   #
+  if $schedule != undef {
+    Exec {
+      schedule => $schedule, }
+  }
+
   if $user == '' {
     exec { "git_clean_exec_$name":
       cwd     => $real_name ? {
